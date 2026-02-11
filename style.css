@@ -1,0 +1,194 @@
+/* Global Refinements */
+body {
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+    /* No scroll */
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    padding: 20px;
+}
+
+/* Header & Footer */
+.logo-container {
+    padding-top: 40px;
+    display: flex;
+    justify-content: center;
+    opacity: 0.9;
+}
+
+.instruction-text {
+    padding-bottom: 40px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #888;
+    text-transform: uppercase;
+}
+
+/* Carousel Container */
+.carousel-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px;
+    width: 100%;
+    position: relative;
+}
+
+/* Card Styling */
+.card {
+    width: 200px;
+    /* Base size */
+    height: 200px;
+    margin: 0 10px;
+    border-radius: 20px;
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    overflow: hidden;
+    background: #111;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.thumbnail {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+/* Active State Logic */
+.card.active {
+    width: 250px;
+    height: 250px;
+    z-index: 10;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    margin: 0 30px;
+    /* Extra spacing for active */
+}
+
+.card.active .thumbnail {
+    opacity: 1;
+}
+
+/* Siblings (Shrink effect) */
+.card.inactive-left,
+.card.inactive-right {
+    transform: scale(0.85);
+    /* Visual shrink */
+    filter: brightness(0.5);
+    /* Dimming */
+}
+
+/* Video Player Elements */
+.hidden-video {
+    display: none;
+    /* Audio only plays? Or do we want video? User said "Thumbnail plays video". Assuming overlay or replace. */
+    /* Let's overlay the video or just play sound? 
+       "영상이 재생되면서 소리가 나오는... 썸네일 위에 플레이 버튼이 생기고" implies the thumbnail might stay or be replaced by video.
+       For seamless UI, better to fade in video or just audio + progress if it's "audio included video".
+       User said: "Video plays... circular progress bar".
+       Let's assume the thumbnail IS the video poster, and we just play the audio, OR play the video in place.
+       Let's force the video to cover the thumbnail.
+    */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    /* Above thumbnail */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.card.playing .hidden-video {
+    display: block;
+    opacity: 1;
+}
+
+/* Overlay Controls */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    /* Let clicks pass to card */
+}
+
+.play-btn {
+    font-size: 40px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.card.active .play-btn {
+    opacity: 0.8;
+    /* Show play button on active */
+}
+
+.card.playing .play-btn {
+    opacity: 0;
+    /* Hide when playing */
+}
+
+/* Progress and Replay */
+.progress-container {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.card.playing .progress-container {
+    opacity: 1;
+}
+
+.progress-ring__circle {
+    transition: stroke-dashoffset 0.1s linear;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+.replay-icon {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    display: none;
+}
+
+.card.ended .play-btn {
+    opacity: 0;
+}
+
+.card.ended .progress-container {
+    opacity: 1;
+}
+
+.card.ended .replay-icon {
+    display: block;
+}

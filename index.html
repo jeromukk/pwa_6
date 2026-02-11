@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Genesis Magma Sound</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <style>
+        /* === 변수 및 폰트 설정 === */
+        :root {
+            --main-orange: #F25C05;
+        }
+
+        @font-face {
+            font-family: 'GenesisSansHeadGlobal-Light';
+            src: url('font/GenesisSansHeadGlobal-Light.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'GenesisSansHeadGlobal-Light', sans-serif;
+            color: white;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+        }
+
+        /* === 헤더 위치 (상단 고정) === */
+        .header {
+            position: absolute;
+            top: 14%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            z-index: 20;
+            width: 100%;
+        }
+
+        .logo-img {
+            height: 40px;
+            width: auto;
+            display: block;
+        }
+
+        .brand-name {
+            font-size: 2.8rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--main-orange);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .sub-title {
+            display: block;
+            font-size: 1.6rem;
+            color: #888;
+            margin-top: 5px;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+
+        /* === 컨테이너 === */
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 96%;
+            max-width: 1800px;
+            margin-top: 0;
+        }
+
+        .card-group {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .card-label {
+            font-size: 1.4rem;
+            color: white !important;
+            font-weight: normal;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .sub-label {
+            font-size: 1.1rem;
+            color: #888 !important;
+            font-weight: normal;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* === 3:4 비율 카드 === */
+        .card-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            z-index: 10;
+            transform: scale(1);
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #111;
+        }
+
+        .card-wrapper.animate-scale {
+            animation: popScale 0.3s forwards;
+        }
+
+        @keyframes popScale {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .video-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-color: #1a1a1a;
+            border-radius: inherit;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* === [중요] 썸네일 이미지 스타일 === */
+        .thumbnail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* 이미지를 꽉 채움 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            display: block;
+            /* 이미지 표시 강제 */
+        }
+
+        .active-group .card-label {
+            color: var(--main-orange);
+            font-weight: bold;
+        }
+
+        .active-group .thumbnail-image {
+            opacity: 1;
+        }
+
+        .active-group .video-card {
+            box-shadow: 0 0 25px var(--main-orange);
+        }
+
+        /* === 푸터 위치 === */
+        .footer {
+            position: absolute;
+            bottom: calc(20% - 60px);
+            font-size: 1rem;
+            color: #666;
+            letter-spacing: 1px;
+            font-family: 'GenesisSansHeadGlobal-Light', sans-serif;
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        #fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .video-wrapper {
+            width: 1100px;
+            height: 619px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background: black;
+        }
+
+        #main-player {
+            width: 1100px;
+            height: 619px;
+            object-fit: contain;
+            display: block;
+            border-radius: 16px;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            z-index: 10000;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(50, 50, 50, 0.8);
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .close-btn:active {
+            transform: scale(0.9);
+            background: var(--main-orange);
+            border-color: var(--main-orange);
+        }
+
+        .close-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: white;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        #loading-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #666;
+            font-size: 12px;
+            z-index: 100;
+            font-family: 'GenesisSansHeadGlobal-Light', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loading-indicator">에셋 로딩 중...</div>
+
+    <div class="header">
+        <div class="brand-name">MAGMA<br><span class="sub-title">A NEW CHAPTER BEGINS</span></div>
+    </div>
+
+    <div class="container">
+        <div class="card-group" id="group1">
+            <div class="card-wrapper" id="wrapper1">
+                <div class="video-card">
+                    <img class="thumbnail-image" src="image/img_04.png" alt="thumb1">
+                </div>
+            </div>
+            <div class="card-label">
+                마그마 스타일<br><span class="sub-label">MAGMA style</span>
+            </div>
+        </div>
+
+        <div class="card-group" id="group2">
+            <div class="card-wrapper" id="wrapper2">
+                <div class="video-card">
+                    <img class="thumbnail-image" src="image/img_05.png" alt="thumb2">
+                </div>
+            </div>
+            <div class="card-label">
+                마그마 퍼포먼스<br><span class="sub-label">MAGMA performance</span>
+            </div>
+        </div>
+
+        <div class="card-group" id="group3">
+            <div class="card-wrapper" id="wrapper3">
+                <div class="video-card">
+                    <img class="thumbnail-image" src="image/img_06.png" alt="thumb3">
+                </div>
+            </div>
+            <div class="card-label">
+                감각의 마그마<br><span class="sub-label">Feelings of magma</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">제네시스 마그마의 탄생과 철학, 그리고 마그마 고유의 감각까지.<br>새로운 차원의 몰입을 경험해보세요.</div>
+
+    <div id="fullscreen-overlay">
+        <div class="close-btn" onclick="closeFullscreen()">
+            <svg viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+        <div class="video-wrapper">
+            <video id="main-player" playsinline></video>
+        </div>
+    </div>
+
+    <!-- 오디오 태그 제거 날림 -->
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.error('Service Worker registration failed', err));
+        }
+
+        // === [수정] 파일명을 img_01 형식으로 변경 ===
+        const THUMBNAIL_FILES = [
+            "image/img_04.png",
+            "image/img_05.png",
+            "image/img_06.png"
+        ];
+
+        const VIDEO_FILES = [
+            "video/video_01.mp4",
+            "video/video_02.mp4",
+            "video/video_03.mp4"
+        ];
+
+        const blobUrls = new Array(3).fill(null);
+
+        const wrappers = document.querySelectorAll('.card-wrapper');
+        const groups = document.querySelectorAll('.card-group');
+        const thumbnailImages = document.querySelectorAll('.thumbnail-image');
+
+        const overlay = document.getElementById('fullscreen-overlay');
+        const mainPlayer = document.getElementById('main-player');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // === 초기화 ===
+        async function initApp() {
+            // 1. 썸네일 이미지 연결 (JS로 src 주입) + 에러 핸들링
+            thumbnailImages.forEach((img, index) => {
+                if (THUMBNAIL_FILES[index]) {
+                    img.src = THUMBNAIL_FILES[index];
+                    img.onerror = () => {
+                        console.error(`Failed to load thumbnail: ${THUMBNAIL_FILES[index]}`);
+                        img.style.opacity = '0.3';
+                    };
+                    img.onload = () => {
+                        console.log(`Thumbnail ${index + 1} loaded successfully`);
+                    };
+                }
+            });
+
+            // 2. 영상 프리로드
+            const promises = VIDEO_FILES.map(async (url, index) => {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Failed to load ${url}`);
+                    const blob = await response.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    blobUrls[index] = objectUrl;
+                    console.log(`Video ${index + 1} loaded as Blob`);
+                } catch (error) {
+                    console.error(`Error loading video ${index + 1}:`, error);
+                    blobUrls[index] = url;
+                }
+            });
+
+            await Promise.all(promises);
+            loadingIndicator.style.display = 'none';
+            console.log("All videos preloaded into memory.");
+        }
+
+        function triggerScaleAnimation(wrapper) {
+            wrapper.classList.remove('animate-scale');
+            void wrapper.offsetWidth;
+            wrapper.classList.add('animate-scale');
+            setTimeout(() => {
+                wrapper.classList.remove('animate-scale');
+            }, 300);
+        }
+
+        wrappers.forEach((wrapper, index) => {
+            wrapper.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                triggerScaleAnimation(wrapper);
+                playFullscreen(index);
+            });
+        });
+
+        function playFullscreen(index) {
+            groups.forEach(g => g.classList.remove('active-group'));
+            groups[index].classList.add('active-group');
+
+            overlay.style.display = 'flex';
+
+            // Blob URL 사용
+            mainPlayer.src = blobUrls[index] || VIDEO_FILES[index];
+            mainPlayer.currentTime = 0;
+            mainPlayer.muted = false; // 비디오 자체 사운드 재생
+            mainPlayer.volume = 1.0;
+
+            mainPlayer.play().catch(err => {
+                console.error("비디오 재생 실패:", err);
+            });
+
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+            }, 300);
+        }
+
+        mainPlayer.onended = function () {
+            closeFullscreen();
+        };
+
+        function closeFullscreen() {
+            overlay.style.opacity = '0';
+            mainPlayer.pause();
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                mainPlayer.src = "";
+                groups.forEach(g => g.classList.remove('active-group'));
+            }, 500);
+        }
+
+        window.addEventListener('load', () => {
+            initApp();
+        });
+    </script>
+</body>
+
+</html>
