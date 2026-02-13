@@ -1,4 +1,4 @@
-const CACHE_NAME = 'art-exhibition-v24-videopopup-resize';
+const CACHE_NAME = 'art-exhibition-v25-force-update';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
