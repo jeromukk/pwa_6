@@ -1,4 +1,4 @@
-const CACHE_NAME = 'art-exhibition-v22-ipad-optimized';
+const CACHE_NAME = 'art-exhibition-v24-videopopup-resize';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
