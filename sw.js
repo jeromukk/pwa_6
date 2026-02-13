@@ -1,4 +1,4 @@
-const CACHE_NAME = 'art-exhibition-v25-force-update';
+const CACHE_NAME = 'art-exhibition-v26-fullscreen';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
